@@ -29,3 +29,11 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::072942364694:role/landing-zone-github-actions-role
           aws-region: us-east-1
+
+      - name: Terraform Init
+        working-directory: environments/dev
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: environments/dev
+        run: terraform plan
