@@ -9,12 +9,12 @@ terraform {
             bucket = "fabio-landing-zone-state"
             key = "dev/terraform.tfstate"
             region = "us-east-2"
-            profile = "AdministratorAccess-072942364694"
+            
         }
     }
     provider "aws" {
         region = "us-east-1"
-        profile = "AdministratorAccess-072942364694"
+        
 
     }
     resource "aws_vpc" "main" {
