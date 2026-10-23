@@ -298,3 +298,17 @@ makes it easy to accidentally copy things that shouldn't be reused
 across environments. Catching this early, via a low budget threshold 
 and routine `terraform plan` checks, kept the cost small and turned 
 into a concrete improvement to the project's guardrails.
+
+## CI/CD Pipeline
+
+A GitHub Actions workflow (`.github/workflows/terraform-plan.yml`) runs `terraform init` and `terraform plan` on the dev environment every time code is pushed to main or a pull request is opened. This shows what would change before anything touches AWS.
+
+### How it logs into AWS
+
+The workflow uses OIDC, which means GitHub proves its identity to AWS with a short-lived token instead of a stored password or access key. I created an OIDC provider and an IAM role (`landing-zone-github-actions-role`) in Terraform. The role has read-only access and can only be assumed by this repository.
+
+### Issues hit and how they were fixed
+
+- **Trust rule spelling:** the role's trust condition didn't match my GitHub username's exact capitalization. AWS compares the text exactly, so one capital letter was enough to block access.
+- **Repo ID in the token:** because the repository had been renamed, GitHub's token included numeric IDs after the owner and repo name. I printed the real token subject in a temporary debug step, saw the difference, and loosened the condition with wildcards while keeping it locked to my owner and repo.
+- **Backend profile:** the Terraform backend and provider blocks pointed at my local SSO profile, which doesn't exist on GitHub's runner. I removed those lines so the pipeline uses the OIDC role, and I now set AWS_PROFILE in my terminal when working locally.
